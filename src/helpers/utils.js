@@ -25,7 +25,7 @@ module.exports.Model = class Model {
     get(id, page = 1, pageSize = 3) {
         if(id) 
             return {
-                items: this.list.find(item => item.id == id),
+                items: [this.list.find(item => item.id == id)],
                 currentPage: page,
                 pageSize: pageSize
             }
