@@ -19,9 +19,9 @@ module.exports = postsController = {
         return res.json(notEmpty(PostModelSingleton.get(req.params.id, req.query.page, req.query.pageSize)) || res.sendStatus(404));
     },
     createPost: (req, res) => {
-        const id = PostModelSingleton.create(req.body);
-        if(validId(id)) {
-            return res.json(PostModelSingleton.get(id));
+        const myNewPost = PostModelSingleton.create(req.body);
+        if(validId(myNewPost?.id)) {
+            return res.json(myNewPost);
         }
         else {
             return res.sendStatus(400);

@@ -67,7 +67,7 @@ module.exports.Model = class Model {
         }
 
         const id = this.list.push(new this.modelType({id: this.list.length, ...attr})) -1;
-        return id;
+        return this.list[id];
     }
 
     update(id, {title, body, tags}) {

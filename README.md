@@ -11,4 +11,5 @@ Run the project: `npm start`
 
 Project route: `localhost:3000`
 
-# API
+# API Testing
+Testing API routes: `npm test`
