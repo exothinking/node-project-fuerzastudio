@@ -23,12 +23,14 @@ module.exports.Model = class Model {
     }
 
     get(id, page = 1, pageSize = 3) {
-        if(id) 
+        if(id) {
+            let found = this.list.find(item => item.id == id);
             return {
-                items: [this.list.find(item => item.id == id)],
+                items: found ? [found] : [],
                 currentPage: page,
                 pageSize: pageSize
             }
+        }
         else {
             if(!this.validPage(Number(page))) {
                 page = 0;
