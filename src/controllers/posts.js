@@ -1,48 +1,113 @@
 const PostModelSingleton = require('../models/post');
-
-function notEmpty(res) {
-    if(!res && res != [] && res !== 0) {
-        return false
-    }
-    return res;
-}
-
-function validId(id) {
-    if(!id && id !== 0) {
-        return false
-    }
-    return true;
-}
+const {validItemsResponse, validId, validPage, validString, validTags} = require('../helpers/utils');
 
 module.exports = postsController = {
     listPosts: (req, res) => {
-        return res.json(notEmpty(PostModelSingleton.get(req.params.id, req.query.page, req.query.pageSize)) || res.sendStatus(404));
+
+        let id = req.params.id;
+        let page = req.query.page;
+        let pageSize = req.query.pageSize;
+        let items = [];
+
+        if(!validPage(Number(page))) {
+            page = 0;
+        }
+        else {
+            page = Number(page) - 1;
+        }
+
+        if(!validPage(Number(pageSize))) {
+            pageSize = 3;
+        }
+        else {
+            pageSize = Number(pageSize);
+        }
+
+        if(validId(id)) {
+            items = PostModelSingleton.get(id);
+        }
+        else {
+            items = PostModelSingleton.get(null, page, pageSize);
+        }
+
+        if(validItemsResponse(items)) {
+            return res.json({
+                items: items,
+                currentPage: page + 1,
+                pageSize: pageSize
+            });
+        }
+        else {
+            return res.sendStatus(404);
+        }
     },
     createPost: (req, res) => {
-        const myNewPost = PostModelSingleton.create(req.body);
-        if(validId(myNewPost?.id)) {
-            return res.json(myNewPost);
-        }
-        else {
+
+        let attr = req.body;
+
+        if(
+            !validString(attr?.title) || 
+            !validString(attr?.body) || 
+            (attr?.tags && !validTags(attr?.tags))
+        ) {
             return res.sendStatus(400);
         }
+
+        if(!attr?.tags) {
+            attr.tags = [];
+        }
+
+        const myNewPost = PostModelSingleton.create(attr);
+
+        return res.json(myNewPost);
     },
     updatePost: (req, res) => {
-        const response = PostModelSingleton.update(req.params.id, req.body);
-        if(typeof response === 'number') {
-            return res.sendStatus(response);
+
+        let {title, body, tags} = req.body;
+        let id = req.params.id;
+
+        if(!validId(id)) {
+            return res.sendStatus(404);
+        }
+        if(title) {
+            if(!validString(title)) {
+                return res.sendStatus(400);
+            }
+        }
+        if(body) {
+            if(!validString(body)) {
+                return res.sendStatus(400);
+            }
+        }
+        if(tags) {
+            if(!validTags(tags)) {
+                return res.sendStatus(400);
+            }
+        }
+
+        const myUpdatedPost = PostModelSingleton.update(id, {title, body, tags});
+        if(myUpdatedPost) {
+            return res.json(myUpdatedPost);
         }
         else {
-            return res.json(response);
+            return res.sendStatus(404);
         }
     },
     deletePost: (req, res) => {
-        const response = PostModelSingleton.delete(req.params.id);
-        if(typeof response === 'number') {
-            return res.sendStatus(response);
+
+        let id = req.params.id
+        
+        if(!validId(id)) {
+            return res.sendStatus(404);
+        }
+
+        const deleted = PostModelSingleton.delete(id);
+
+        if(deleted) {
+            return res.sendStatus(200);
         }
         else {
-            return res.sendStatus(200);
+            return res.sendStatus(404);
         }
     }
 };

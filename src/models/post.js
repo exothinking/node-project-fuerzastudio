@@ -48,7 +48,7 @@ class PostModel extends Model {
             ]
         }),
         new this.modelType({
-            id: 2,
+            id: 3,
             title: 'My Fourth Post',
             body: 'Lorem ipsun',
             tags: [
@@ -56,7 +56,7 @@ class PostModel extends Model {
             ]
         }),
         new this.modelType({
-            id: 2,
+            id: 4,
             title: 'My 5th Post',
             body: 'Lorem ipsun',
             tags: [
@@ -64,7 +64,7 @@ class PostModel extends Model {
             ]
         }),
         new this.modelType({
-            id: 2,
+            id: 5,
             title: 'My 6th Post',
             body: 'Lorem ipsun',
             tags: [
@@ -72,7 +72,7 @@ class PostModel extends Model {
             ]
         }),
         new this.modelType({
-            id: 2,
+            id: 6,
             title: 'My 7th Post',
             body: 'Lorem ipsun',
             tags: [

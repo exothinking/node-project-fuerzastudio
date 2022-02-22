@@ -1,97 +1,69 @@
 module.exports.appUrl = '/api';
+module.exports.validItemsResponse = function validItemsResponse(res) {
+    if(!res && res != []) {
+        return false;
+    }
+    return true;
+}
+module.exports.validId = function validId(id) {
+    if(!id && id !== 0) {
+        return false;
+    }
+    return true;
+}
+module.exports.validPage = function validPage(page) {
+    return typeof page === 'number' && page > 0;
+}
+
+function validString(str) {
+    return typeof str === 'string'
+}
+module.exports.validString = validString;
+
+module.exports.validTags = function validTags(tags) {
+    if(!Array.isArray(tags)) {
+        return false;
+    }
+    for(var i = 0; i < tags.length; i++) {
+        if(!validString(tags[i])) {
+            return false;
+        }
+    }
+    return true;
+}
 module.exports.Model = class Model {
     constructor() { }
 
-    validString(str) {
-        return typeof str === 'string'
+    validPageForSlice(page) {
+        return typeof page === 'number' && page >= 0;
     }
 
-    validTags(tags) {
-        if(!Array.isArray(tags)) {
-            return false;
-        }
-        for(var i = 0; i < tags.length; i++) {
-            if(!this.validString(tags[i])) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    validPage(page) {
-        return typeof page === 'number' && page > 0;
-    }
-
-    get(id, page = 1, pageSize = 3) {
-        if(id) {
-            let found = this.list.find(item => item.id == id);
-            return {
-                items: found ? [found] : [],
-                currentPage: page,
-                pageSize: pageSize
-            }
+    get(id, page, pageSize) {
+        if(this.validPageForSlice(page) && this.validPageForSlice(pageSize)) {
+            return this.list.slice(page * pageSize, (page * pageSize) + pageSize) || [];
         }
         else {
-            if(!this.validPage(Number(page))) {
-                page = 0;
-            }
-            else {
-                page = Number(page) - 1;
-            }
-
-            if(!this.validPage(Number(pageSize))) {
-                pageSize = 3;
-            }
-            else {
-                pageSize = Number(pageSize);
-            }
-
-            return {
-                items: this.list.slice(page * pageSize, (page * pageSize) + pageSize),
-                currentPage: page + 1,
-                pageSize: pageSize
-            };
+            let found = this.list.find(item => item.id == id);
+            return found ? [found] : [];
         }
     }
 
     create(attr) {
-
-        if(
-            !this.validString(attr?.title) || 
-            !this.validString(attr?.body) || 
-            (attr?.tags && !this.validTags(attr?.tags))
-        ) {
-            return false;
-        }
-
-        if(!attr?.tags) {
-            attr.tags = [];
-        }
-
         const id = this.list.push(new this.modelType({id: this.list.length, ...attr})) -1;
         return this.list[id];
     }
 
     update(id, {title, body, tags}) {
         if(!this.list[id]) {
-            return 404;
+            return false;
         }
         if(title) {
-            if(!this.validString(title)) {
-                return 400;
-            }
             this.list[id].title = title;
         }
         if(body) {
-            if(!this.validString(body)) {
-                return 400;
-            }
             this.list[id].body = body;
         }
         if(tags) {
-            if(!this.validTags(tags)) {
-                return 400;
-            }
             this.list[id].tags = tags;
         }
         return this.list[id];
@@ -99,7 +71,7 @@ module.exports.Model = class Model {
 
     delete(id) {
         if(!this.list[id]) {
-            return 404;
+            return false;
         }
         else {
             this.list.splice(id, 1);
